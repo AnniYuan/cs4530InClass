@@ -17,23 +17,16 @@ type ImportTranscript = {
 */
 export async function importGrades(gradesToImport: ImportTranscript[]): Promise<Transcript[]> {
   const ret: Transcript[] = [];
-  //Here is some example code that makes the API calls that you will need (addStudent, addGrade, and getTranscript)
-  console.log('Creating a student');
   const promisesForTranscripts = gradesToImport.map(
-    async (gradesToImport) => {
-      const { studentID } = await client.addStudent(gradesToImport.studentName);
-      const promisesForCourses = gradesToImport.grades.map(
-        async (grade) => {
-          await client.addGrade(studentID, grade.course, grade.grade); 
-        }
-      );
-      ret.push(await client.getTranscript(studentID));
-      return ret;
-    }
-  );
-  const { studentID } = await client.addStudent('test student');
-  await client.addGrade(studentID, 'demo course', 100);
-  ret.push(await client.getTranscript(studentID));
+    async (studentGrades) => {
+    const { studentID } = await client.addStudent(studentGrades.studentName);
+    const promisForGrades = studentGrades.grades.map(
+      async (grade) => {const response = await client.addGrade(studentID, grade.course, grade.grade);}
+      )
+      await Promise.all(promisForGrades);
+    ret.push(await client.getTranscript(studentID));
+    })
+    await Promise.all(promisesForTranscripts);
   return ret;
 }
 
